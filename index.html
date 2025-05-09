@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spotify Artistsuche</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 100px;
+        }
+        input {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎧 Lieblingskünstler suchen</h1>
+    <form action="/search" method="post">
+        <input type="text" name="artist" placeholder="Künstlername eingeben" required>
+        <button type="submit">Suchen</button>
+    </form>
+</body>
+</html>

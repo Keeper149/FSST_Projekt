@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Artist Info</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+        img { max-width: 300px; border-radius: 10px; }
+        .info { margin-top: 20px; }
+        a { color: green; text-decoration: none; }
+    </style>
+</head>
+<body>
+    {% if data %}
+        <h1>{{ data.name }}</h1>
+        {% if data.image %}
+            <img src="{{ data.image }}" alt="Artist Image">
+        {% endif %}
+        <div class="info">
+            <p><strong>Genres:</strong> {{ data.genres | join(", ") }}</p>
+            <p><strong>Popularität:</strong> {{ data.popularity }}/100</p>
+            <p><strong>Follower:</strong> {{ data.followers }}</p>
+            <p><a href="{{ data.spotify_url }}" target="_blank">🎵 Spotify öffnen</a></p>
+        </div>
+    {% else %}
+        <h2>Kein Treffer für "{{ artist_input }}"</h2>
+    {% endif %}
+    <br><br>
+    <a href="/">🔁 Neue Suche</a>
+</body>
+</html>
