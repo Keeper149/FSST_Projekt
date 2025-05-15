@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Spotify Artistsuche</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 40px;
+            color: #222;
+        }
+        form {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        input[type="text"] {
+            padding: 10px 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #17a246;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Künstler suchen</h1>
+    <form action="/search" method="post">
+        <input type="text" name="artist" placeholder="z. B. Travis Scott" required>
+        <button type="submit">Suchen</button>
+    </form>
+</body>
+</html>
