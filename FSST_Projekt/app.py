@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.exceptions import SpotifyException
 from sqlalchemy import create_engine, Column, String, Integer
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -28,6 +29,7 @@ class Artist(Base):
     popularity = Column(Integer)
     Img = Column(String)
     external_urls = Column(String)
+
     def __init__(self, Name, genres, followers, popularity, Img, external_urls):
         self.Name = Name
         self.genres = genres
@@ -47,7 +49,7 @@ def search():
     q = request.form["artist"].strip()
     mode = request.form["search_mode"]
 
-    # Offline-Modus
+    # Offline-Modus: nur lokale DB abfragen
     if mode == "offline":
         a = session.query(Artist).filter_by(Name=q).first()
         data = None
@@ -61,15 +63,19 @@ def search():
                 "spotify_url": a.external_urls
             }
         return render_template("result.html",
-                               data=data, artist_input=q,
-                               top_tracks=[], latest_albums=[])
+                               data=data,
+                               artist_input=q,
+                               top_tracks=[],
+                               latest_albums=[])
 
-    # Online-Suche
+    # Online-Modus: Spotify-API ansprechen
     res = sp.search(q=q, type="artist", limit=1)["artists"]["items"]
     if not res:
         return render_template("result.html",
-                               data=None, artist_input=q+" (online)",
-                               top_tracks=[], latest_albums=[])
+                               data=None,
+                               artist_input=q + " (online)",
+                               top_tracks=[],
+                               latest_albums=[])
 
     ent = res[0]
     artist_id = ent["id"]
@@ -80,18 +86,26 @@ def search():
     img = ent["images"][0]["url"] if ent["images"] else None
     url = ent["external_urls"]["spotify"]
 
-    # Nur speichern, wenn neu
+    # In DB speichern, falls neu
     if not session.query(Artist).filter_by(Name=name).first():
         session.add(Artist(name, genres, foll, pop, img, url))
         session.commit()
 
-    # Top 5 Songs
-    top_tracks = [t["name"]
-                  for t in sp.artist_top_tracks(artist_id, country="DE")["tracks"][:5]]
+    # Top 10 Songs (Cover, Preview, Popularity)
+    tracks = sp.artist_top_tracks(artist_id, country="DE")["tracks"][:10]
+    top_tracks = []
+    for t in tracks:
+        top_tracks.append({
+            "name": t["name"],
+            "popularity": t["popularity"],
+            "preview_url": t["preview_url"],
+            "cover": t["album"]["images"][-1]["url"] if t["album"]["images"] else None
+        })
 
-    # 3 neueste Alben
+    # Neueste 3 Alben nebeneinander
     albums = sp.artist_albums(artist_id, album_type="album", limit=10)["items"]
-    seen = set(); latest_albums = []
+    seen = set()
+    latest_albums = []
     for alb in albums:
         title = alb["name"]
         if title not in seen:
@@ -115,7 +129,8 @@ def search():
     }
 
     return render_template("result.html",
-                           data=data, artist_input=name,
+                           data=data,
+                           artist_input=name,
                            top_tracks=top_tracks,
                            latest_albums=latest_albums)
 
