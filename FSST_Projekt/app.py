@@ -85,19 +85,15 @@ def search():
     img = entry["images"][0]["url"] if entry["images"] else None
     url = entry["external_urls"]["spotify"]
 
-    # In DB aktualisieren
+    # Nur speichern, wenn noch nicht in DB
     existing = session.query(Artist).filter_by(Name=name).first()
-    if existing:
-        session.delete(existing)
+    if not existing:
+        artist_obj = Artist(name, genres, followers, popularity, img, url)
+        session.add(artist_obj)
         session.commit()
 
-    artist_obj = Artist(name, genres, followers, popularity, img, url)
-    session.add(artist_obj)
-    session.commit()
-
-    # Aus DB lesen
+    # Daten aus DB anzeigen
     artist_from_db = session.query(Artist).filter_by(Name=name).first()
-
     data = {
         "name": artist_from_db.Name,
         "genres": artist_from_db.genres.split(", "),
